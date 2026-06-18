@@ -36,6 +36,14 @@ namespace SYSTEMESCAPE
         public bool HasBackpack      { get; set; }
         public bool BinaryPuzzleDone { get; set; }
 
+        // Clears all in-game progress. Called by New Game, because this object
+        // survives scene loads and would otherwise keep flags from the last playthrough.
+        public void ResetProgress()
+        {
+            HasBackpack      = false;
+            BinaryPuzzleDone = false;
+        }
+
         // Settings (persisted separately)
         public float MasterVolume   { get; set; } = 1f;
         public float MouseSensitivity { get; set; } = 0.12f;

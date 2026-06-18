@@ -28,6 +28,9 @@ namespace SYSTEMESCAPE
         // True while the gate minigame is open, so the pause menu ignores ESC.
         public static bool MinigameIsOpen { get; private set; }
 
+        // Clears the static flag when a new gameplay scene loads (builds keep statics alive)
+        public static void ForceReset() { MinigameIsOpen = false; }
+
         private bool _introDone = false;
         private bool _isOpen = false;
 

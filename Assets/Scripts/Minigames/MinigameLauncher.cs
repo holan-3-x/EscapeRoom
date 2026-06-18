@@ -22,6 +22,9 @@ namespace SYSTEMESCAPE
         // True while ANY launcher's minigame is open (pause/inventory check this)
         public static bool AnyOpen { get; private set; }
 
+        // Clears the static flag when a new gameplay scene loads (builds keep statics alive)
+        public static void ForceReset() { AnyOpen = false; }
+
         [Header("The minigame UI to open (starts disabled)")]
         [SerializeField] private GameObject minigameRoot;
 

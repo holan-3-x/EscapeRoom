@@ -109,8 +109,13 @@ namespace SYSTEMESCAPE
 
         private void StartGame(Gender gender)
         {
-            SaveSystem.DeleteSave();   // New Game always wipes the old save
-            if (GameManager.Instance != null) GameManager.Instance.SelectedGender = gender;
+            SaveSystem.DeleteSave();              // wipe the saved file
+            Time.timeScale = 1f;                  // in case a previous run left it paused/sped up
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.ResetProgress();   // clear backpack/puzzle flags from last run
+                GameManager.Instance.SelectedGender = gender;
+            }
             FadeOverlay(1f, 0.6f, () => SceneManager.LoadScene(gameplayScene));
         }
 

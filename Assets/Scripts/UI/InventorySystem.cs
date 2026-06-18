@@ -37,6 +37,14 @@ namespace SYSTEMESCAPE
         {
             if (Instance == null) Instance = this;
             else { Destroy(gameObject); return; }
+
+            // Reset cross-scene static flags. In a BUILD, statics keep their value for the
+            // whole app session, so a flag left true by a previous playthrough would block
+            // the backpack (TAB) on a New Game. Clear them all when the gameplay scene loads.
+            IsOpen = false;
+            PauseMenuManager.ForceReset();
+            LogicGateTerminal.ForceReset();
+            MinigameLauncher.ForceReset();
         }
 
         private void Start()

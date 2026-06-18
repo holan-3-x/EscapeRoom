@@ -49,6 +49,9 @@ namespace SYSTEMESCAPE
         // So the inventory knows not to open while paused
         public static bool IsPaused { get; private set; }
 
+        // Clears the static flag when a new gameplay scene loads (builds keep statics alive)
+        public static void ForceReset() { IsPaused = false; Time.timeScale = 1f; }
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
