@@ -65,9 +65,11 @@ namespace SYSTEMESCAPE
             ForceHide(creditsPanel);
             _current = mainPanel;
 
-            // Continue button only visible when a save exists
+            // Continue is hidden: the game is a single-session escape room, so it only
+            // offers New Game. (The minimal save did not restore position/puzzle state,
+            // which made "Continue" feel like a restart, so we removed it.)
             if (continueButton != null)
-                continueButton.gameObject.SetActive(SaveSystem.HasSave());
+                continueButton.gameObject.SetActive(false);
 
             // Populate settings sliders
             if (GameManager.Instance != null)

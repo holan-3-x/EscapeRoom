@@ -16,7 +16,9 @@ namespace SYSTEMESCAPE
     //   Add KeypadButton scripts to each number button (digit 0-9) + a Clear button.
     //   Wire On Unlock to open the final door.
 
-    public class PhoneCipherLock : MonoBehaviour
+    // Implements IInteractable so the player can press E on the keypad even before it is
+    // powered on, and ARIA tells them what is still missing.
+    public class PhoneCipherLock : MonoBehaviour, IInteractable
     {
         public static PhoneCipherLock Instance { get; private set; }
 
@@ -29,11 +31,23 @@ namespace SYSTEMESCAPE
         [Header("Display (3D OR UI TMP — both work)")]
         [SerializeField] private TMP_Text display;   // TMP_Text = base type for 3D and UI TMP
 
+        [Header("Locked until ARIA is freed (block game solved)")]
+        [Tooltip("If true, the keypad does nothing until Unlock() is called. Wire the block " +
+                 "game's MinigameLauncher.OnSolved to this object's Unlock().")]
+        [SerializeField] private bool startsLocked = true;
+        [Tooltip("The number buttons to switch ON when the keypad is unlocked (start them disabled).")]
+        [SerializeField] private GameObject buttonsRoot;
+        [TextArea]
+        [SerializeField] private string lockedLine =
+            "This keypad's dead — I can't crack it from out here. Find the screen in this room " +
+            "and guide me through the system first.";
+
         [Header("Fires when the correct PIN is entered")]
         public UnityEvent OnUnlock;
 
         private string _entered = "";
-        private bool _unlocked = false;
+        private bool _unlocked = false;   // PIN solved
+        private bool _powered  = false;   // keypad enabled (ARIA freed)
         private bool _introShown = false;
 
         private void Awake()
@@ -42,12 +56,39 @@ namespace SYSTEMESCAPE
             else { Destroy(gameObject); return; }
         }
 
-        private void Start() => UpdateDisplay();
+        private void Start()
+        {
+            _powered = !startsLocked;
+            if (buttonsRoot != null) buttonsRoot.SetActive(_powered);
+            UpdateDisplay();
+        }
+
+        // Wire the block game's MinigameLauncher.OnSolved here to power the keypad on
+        public void Unlock()
+        {
+            _powered = true;
+            if (buttonsRoot != null) buttonsRoot.SetActive(true);
+            SoundManager.Instance?.PlayBoot();
+            ClassroomSceneFlow.Instance?.ShowDialogue("ARIA",
+                "I'm in the system now - the keypad's live. Read the poster, work out the code, " +
+                "and type it in. Let's go home.",
+                autoClose: true, autoCloseDelay: 5f);
+        }
+
+        // IInteractable: pressing E on the keypad before it's powered gives ARIA's hint
+        public string GetPrompt() => (_powered || _unlocked) ? "" : "[E] Examine keypad";
+
+        public void Interact()
+        {
+            if (_powered || _unlocked) return;
+            ClassroomSceneFlow.Instance?.ShowDialogue("ARIA", lockedLine,
+                autoClose: true, autoCloseDelay: 4.5f);
+        }
 
         // Called by each KeypadButton
         public void EnterDigit(int digit)
         {
-            if (_unlocked) return;
+            if (_unlocked || !_powered) return;
 
             // First touch: ARIA explains the cipher before any digit is accepted
             if (!_introShown)
@@ -69,7 +110,7 @@ namespace SYSTEMESCAPE
 
         public void ClearInput()
         {
-            if (_unlocked) return;
+            if (_unlocked || !_powered) return;
             _entered = "";
             SoundManager.Instance?.PlayClick();
             UpdateDisplay();

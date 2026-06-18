@@ -45,6 +45,9 @@ namespace SYSTEMESCAPE
 
         [Header("Fires when the minigame is solved")]
         public UnityEvent OnSolved;
+        [Tooltip("Optional line ARIA says the moment the minigame is solved " +
+                 "(e.g. 'Network's back online, the door just unlocked').")]
+        [TextArea] [SerializeField] private string ariaSolvedLine = "";
 
         [Header("Optional — extra setup/teardown")]
         [Tooltip("Called when the minigame opens. For the block game, wire this to its " +
@@ -151,6 +154,12 @@ namespace SYSTEMESCAPE
             OnClosed?.Invoke();   // e.g. block game's CloseMinigame()
 
             SoundManager.Instance?.PlaySolve();
+
+            // ARIA reacts to the win, so the player gets clear feedback
+            if (!string.IsNullOrEmpty(ariaSolvedLine))
+                ClassroomSceneFlow.Instance?.ShowDialogue("ARIA", ariaSolvedLine,
+                    autoClose: true, autoCloseDelay: 4f);
+
             OnSolved?.Invoke();
         }
     }
